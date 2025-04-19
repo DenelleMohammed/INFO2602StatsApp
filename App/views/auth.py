@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request, flash, send_from_directory, flash, redirect, url_for
 from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
 from App.models import User
+from flask_login import login_user
 
 from.index import index_views
 
@@ -52,7 +53,7 @@ def login_action():
         flash('Login Successful')
         set_access_cookies(response, token) 
     return response """
-@auth_views.route('/login', methods=['POST'])
+""" @auth_views.route('/login', methods=['POST'])
 def login_action():
    data = request.form
    token = login(data['username'], data['password'])
@@ -76,6 +77,67 @@ def login_action():
    flash('Login Successful')
    return response
 
+ """
+
+""" @auth_views.route('/login', methods=['POST'])
+def login_action():
+    data = request.form
+    user = User.query.filter_by(username=data['username']).first()
+
+    if not user or not check_password_hash(user.password, data['password']):
+        flash('Bad username or password given')
+        return redirect(url_for('auth_views.login_page'))
+
+    login_user(user)  # 👈 This is the key for Flask-Login
+    flash('Login Successful')
+
+    if user.user_type == 'admin':
+        return redirect(url_for('admin_views.admin_home'))
+    
+    return redirect(url_for('index_views.home_page')) """
+""" @auth_views.route('/login', methods=['POST'])
+def login_action():
+    data = request.form
+    username = data.get('username')
+    password = data.get('password')
+
+    user = User.query.filter_by(username=username).first()
+
+    if not user or not user.check_password(password):
+        flash('Invalid username or password')
+        return redirect(url_for('auth_views.login_page'))
+
+    login_user(user)  # This logs the user in using Flask-Login
+    flash('Login successful')
+
+    # Redirect based on user type
+    if user.is_admin():
+        return redirect(url_for('admin_views.admin_home'))
+    else:
+        return redirect(url_for('index_views.home_page')) """
+@auth_views.route('/login', methods=['POST'])
+def login_action():
+    data = request.form
+    username = data.get('username')
+    password = data.get('password')
+
+    token = login(username, password)
+
+    if not token:
+        flash('Invalid username or password')
+        return redirect(url_for('auth_views.login_page'))
+
+    user = User.query.filter_by(username=username).first()
+
+    # Manually create response with token cookie
+    if user.user_type == 'admin':
+        response = redirect(url_for('admin_views.admin_home'))
+    else:
+        response = redirect(url_for('index_views.home_page'))
+
+    set_access_cookies(response, token)
+    flash('Login successful')
+    return response
 
 @auth_views.route('/logout', methods=['GET'])
 def logout_action():

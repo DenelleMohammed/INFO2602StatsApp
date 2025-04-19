@@ -9,6 +9,11 @@ from werkzeug.datastructures import  FileStorage
 from App.database import init_db
 from App.config import load_config
 
+from flask_login import LoginManager
+from App.models import User
+
+login_manager = LoginManager()
+
 
 from App.controllers import (
     setup_jwt,

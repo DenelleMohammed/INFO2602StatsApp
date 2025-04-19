@@ -86,7 +86,7 @@
         <ul id="nav-mobile" class="right hide-on-med-and-down" style="display: flex; gap: 12px; margin: 0;">
           <li><a href="/">Home</a></li>
     
-          <p>Authenticated: {{ is_authenticated }}</p>
+          <!-- <p>Authenticated: {{ is_authenticated }}</p> -->
           {% if is_authenticated %}
             {% if current_user.is_admin() %}
               <li><a href="/admin">Admin</a></li>
